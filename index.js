@@ -10,7 +10,7 @@ const connectionParams = {
 }
 
 const dbUrl = 'mongodb+srv://thanglemon204:Chaungoanbacho123@cluster0.tpu0g9i.mongodb.net/myFirstDatabae?retryWrites=true&w=majority'
-const port = 3000
+const port = 3001
 const app = express()
 
 mongoose.connect(dbUrl, connectionParams)
@@ -27,6 +27,20 @@ app.use(bodyParser.json())
 router.use((req, res, next) => {
   console.log(`Time: ${Date.now()}`)
   next()
+})
+
+router.get('/notes', (req, res) => {
+  console.log('note router')
+  const notes = NoteSchema.find({}, function(err, docs) {
+    console.log(docs)
+    console.log(typeof docs)
+    console.log(docs)
+    docs.forEach(item => {
+      console.log('here')
+      console.log(item)
+    })
+  })
+  res.send('<h1>Note page</h1>')
 })
 
 router.get('/', (req, res) => {
@@ -46,13 +60,11 @@ router.get('/hello', (req, res) => {
 
 router.post('/save', (req, res) => {
   console.log('save router')
-  const id = req.body.id_note
   const title = req.body.title
   const body = req.body.body
   const createdAt = Date.now()
 
   const note = {
-    id: id,
     title, body,
     created_at: createdAt,
   }
@@ -61,21 +73,20 @@ router.post('/save', (req, res) => {
   console.log(note)
 
   const newNote = new NoteSchema({
-    id_note: id,
     title: title,
     body: body,
     created_at: createdAt,
   })
 
-  res.send(note)
+  newNote.save(function(err, data) {
+    if (err) {
+      console.log(`Error when saving the data: ${err}`)
+    } else {
+      console.log('Data inserted')
+    }
+  })
 
-  // newNote.save(function(err, data) {
-  //   if (err) {
-  //     console.log(`Error when saving the data: ${err}`)
-  //   } else {
-  //     res.send('<h1>Data inserted</h1>')
-  //   }
-  // })
+  res.send('Save router')
 })
 
 app.use(router)
